@@ -1,0 +1,19 @@
+FRAMEWORK: NET461
+NUGET
+  remote: http://www.nuget.org/api/v2
+    Cake.Core (0.15)
+    Cake.Testing (0.15)
+      Cake.Core (>= 0.15)
+    Shouldly (2.8.2)
+    xunit (2.1)
+      xunit.assert (2.1)
+      xunit.core (2.1)
+    xunit.abstractions (2.0)
+    xunit.assert (2.1)
+    xunit.core (2.1)
+      xunit.extensibility.core (2.1)
+      xunit.extensibility.execution (2.1)
+    xunit.extensibility.core (2.1)
+      xunit.abstractions (2.0)
+    xunit.extensibility.execution (2.1)
+      xunit.extensibility.core (2.1)
