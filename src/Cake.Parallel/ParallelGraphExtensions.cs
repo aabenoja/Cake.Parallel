@@ -13,14 +13,22 @@ namespace Cake.Parallel.Module
             if (!graph.Exist(target)) return Task.CompletedTask;
             if (graph.hasCircularReferences(target)) throw new CakeException("Graph contains circular references.");
 
-            return graph.traverse(target, executeTask);
+            var visitedNodes = new Dictionary<string, Task>();
+            return graph.traverse(target, executeTask, visitedNodes);
         }
 
-        private static Task traverse(this CakeGraph graph, string nodeName, Action<string> executeTask)
+        private static Task traverse(this CakeGraph graph, string nodeName, Action<string> executeTask, IDictionary<string, Task> visitedNodes)
         {
+            if (visitedNodes.ContainsKey(nodeName)) return visitedNodes[nodeName];
+
             var dependentTasks = graph.Edges
                 .Where(_ => _.End.Equals(nodeName, StringComparison.OrdinalIgnoreCase))
-                .Select(_ => graph.traverse(_.Start, executeTask))
+                .Select(_ =>
+                {
+                    var task = graph.traverse(_.Start, executeTask, visitedNodes);
+                    visitedNodes[_.Start] = task;
+                    return task;
+                })
                 .ToArray();
 
             if (!dependentTasks.Any()) return Task.Factory.StartNew(() => executeTask(nodeName));
@@ -32,7 +40,7 @@ namespace Cake.Parallel.Module
         {
             visited = visited ?? new HashSet<string>();
 
-            if (visited.Contains(nodeName)) return true;
+            if (visited.Contains(nodeName) && graph.hasDependency(nodeName)) return true;
 
             visited.Add(nodeName);
             var dependencies = graph.Edges
@@ -40,6 +48,12 @@ namespace Cake.Parallel.Module
                 .Select(_ => _.Start);
 
             return dependencies.Any(dependency => graph.hasCircularReferences(dependency, visited));
+        }
+
+        private static bool hasDependency(this CakeGraph graph, string nodeName)
+        {
+            return graph.Edges
+                .Any(_ => _.End.Equals(nodeName, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

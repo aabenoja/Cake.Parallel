@@ -39,7 +39,7 @@ namespace Cake.Parallel.Tests
                 var task = (ActionTask)_tasks.First(_ => _.Name == nodeName);
                 task.Actions.ForEach(action => action(null));
             });
-            _taskResults.ShouldNotBeEmpty();
+            _taskResults.Count.ShouldBe(5);
         }
 
         private IEnumerable<CakeTask> defineTasks()
