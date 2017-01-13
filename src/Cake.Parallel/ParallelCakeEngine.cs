@@ -26,7 +26,7 @@ namespace Cake.Parallel.Module
 
         public ParallelCakeEngine(ICakeLog logger)
         {
-            logger.Warning("Using experimental shit here");
+            logger.Warning("PARALLELIZER IS A WORK IN PROGRESS! YOU HAVE BEEN WARNED");
 
             _logger = logger;
             _tasks = new List<CakeTask>();

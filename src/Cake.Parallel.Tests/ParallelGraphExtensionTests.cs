@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Cake.Core;
@@ -12,12 +14,12 @@ namespace Cake.Parallel.Tests
     public class ParallelGraphExtensionTests
     {
         private readonly CakeGraph _graph;
+        private readonly StringBuilder _sb;
         private readonly List<CakeTask> _tasks;
-        private readonly List<string> _taskResults;
 
         public ParallelGraphExtensionTests()
         {
-            _taskResults = new List<string>();
+            _sb = new StringBuilder();
             _tasks = new List<CakeTask>(defineTasks());
             _graph = ParallelGraphBuilder.Build(_tasks);
         }
@@ -39,7 +41,8 @@ namespace Cake.Parallel.Tests
                 var task = (ActionTask)_tasks.First(_ => _.Name == nodeName);
                 task.Actions.ForEach(action => action(null));
             });
-            _taskResults.Count.ShouldBe(5);
+            var results = _sb.ToString();
+            Regex.IsMatch(results, "da(bc|cb)e").ShouldBeTrue();
         }
 
         private IEnumerable<CakeTask> defineTasks()
@@ -64,33 +67,34 @@ namespace Cake.Parallel.Tests
                 .Does(() =>
                 {
                     Thread.Sleep(1000);
-                    _taskResults.Add("a");
+                    _sb.Append("a");
                 });
             yield return taskA;
 
             var taskB = new ActionTask("b");
             new CakeTaskBuilder<ActionTask>(taskB)
                 .IsDependentOn("a")
-                .Does(() => _taskResults.Add("b"));
+                .Does(() => _sb.Append("b"));
             yield return taskB;
 
             var taskC = new ActionTask("c");
             new CakeTaskBuilder<ActionTask>(taskC)
                 .IsDependentOn("a")
-                .Does(() => _taskResults.Add("c"));
+                .Does(() => _sb.Append("c"));
             yield return taskC;
 
             var taskD = new ActionTask("d");
             new CakeTaskBuilder<ActionTask>(taskD)
-                .Does(() => _taskResults.Add("d"));
+                .Does(() => _sb.Append("d"));
             yield return taskD;
 
             var taskE = new ActionTask("e");
             new CakeTaskBuilder<ActionTask>(taskE)
+                .IsDependentOn("a")
                 .IsDependentOn("b")
                 .IsDependentOn("c")
                 .IsDependentOn("d")
-                .Does(() => _taskResults.Add("e"));
+                .Does(() => _sb.Append("e"));
             yield return taskE;
         }
     }
