@@ -27,7 +27,7 @@ Task("compile")
   .IsDependentOn("paket-restore")
   .Does(() =>
   {
-    DotNetBuild("./src/Cake.Parallel.sln");
+    MSBuild("./src/Cake.Parallel.sln");
   });
 
 Task("xUnit")

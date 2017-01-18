@@ -1,4 +1,5 @@
 # Cake.Parallel
+[![Build status](https://ci.appveyor.com/api/projects/status/fsap4e20blw55cb0/branch/master?svg=true)](https://ci.appveyor.com/project/aabenoja/cake-parallel/branch/master)
 
 This module overrides the original cake engine to run tasks in parallel.
 
@@ -8,12 +9,11 @@ it into your cake modules directory. This is typically the `/tools/modules`
 directory that you may have to create, unless you have configured otherwise.
 Your cake build should recognize the module and run it instead.
 
-## Compatibility
-This project has been built with `Cake.Core v0.15.0`. If you find your build
-is throwing exceptions around methods not being implemented please check
-what version of `Cake.Core` you've pulled down during your build.
+Please ensure all your tasks have the correct `IsDependent()` chains. This
+ensures when the parallelizer goes through the dependency graph the correct
+tasks are scheduled.
 
-## Caveats
-This module heavily relies on your task dependencies to correctly form the
-graph. Please ensure all your tasks have all their necessary `IsDependentOn()`
-calls.
+## Compatibility
+This project has been built with `Cake v0.15.0`. If you find your build
+is throwing exceptions around methods not being implemented please check
+what version of `Cake` you've pulled down during your build.
