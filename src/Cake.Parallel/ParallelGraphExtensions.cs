@@ -36,24 +36,18 @@ namespace Cake.Parallel.Module
             return Task.Factory.ContinueWhenAll(dependentTasks, _ => executeTask(nodeName));
         }
 
-        private static bool hasCircularReferences(this CakeGraph graph, string nodeName, HashSet<string> visited = null)
+        private static bool hasCircularReferences(this CakeGraph graph, string nodeName, Stack<string> visited = null)
         {
-            visited = visited ?? new HashSet<string>();
+            visited = visited ?? new Stack<string>();
 
-            if (visited.Contains(nodeName) && graph.hasDependency(nodeName)) return true;
+            if (visited.Contains(nodeName)) return true;
 
-            visited.Add(nodeName);
-            var dependencies = graph.Edges
+            visited.Push(nodeName);
+            var hasCircularReference = graph.Edges
                 .Where(_ => _.End.Equals(nodeName, StringComparison.OrdinalIgnoreCase))
-                .Select(_ => _.Start);
-
-            return dependencies.Any(dependency => graph.hasCircularReferences(dependency, visited));
-        }
-
-        private static bool hasDependency(this CakeGraph graph, string nodeName)
-        {
-            return graph.Edges
-                .Any(_ => _.End.Equals(nodeName, StringComparison.OrdinalIgnoreCase));
+                .Any(_ => graph.hasCircularReferences(_.Start, visited));
+            visited.Pop();
+            return hasCircularReference;
         }
     }
 }

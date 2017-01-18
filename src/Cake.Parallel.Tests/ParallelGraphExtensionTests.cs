@@ -36,13 +36,12 @@ namespace Cake.Parallel.Tests
         [Fact]
         public async Task Should_Execute_Dependencies_Asynchronously()
         {
-            await _graph.Traverse("e", nodeName =>
+            await _graph.Traverse("g", nodeName =>
             {
                 var task = (ActionTask)_tasks.First(_ => _.Name == nodeName);
                 task.Actions.ForEach(action => action(null));
             });
-            var results = _sb.ToString();
-            Regex.IsMatch(results, "da(bc|cb)e").ShouldBeTrue();
+            _sb.ToString().Length.ShouldBe(7);
         }
 
         private IEnumerable<CakeTask> defineTasks()
@@ -90,12 +89,25 @@ namespace Cake.Parallel.Tests
 
             var taskE = new ActionTask("e");
             new CakeTaskBuilder<ActionTask>(taskE)
-                .IsDependentOn("a")
-                .IsDependentOn("b")
-                .IsDependentOn("c")
                 .IsDependentOn("d")
                 .Does(() => _sb.Append("e"));
             yield return taskE;
+
+            var taskF = new ActionTask("f");
+            new CakeTaskBuilder<ActionTask>(taskF)
+                .IsDependentOn("e")
+                .Does(() => _sb.Append("f"));
+            yield return taskF;
+
+            var taskG = new ActionTask("g");
+            new CakeTaskBuilder<ActionTask>(taskG)
+                .IsDependentOn("a")
+                .IsDependentOn("b")
+                .IsDependentOn("c")
+                .IsDependentOn("e")
+                .IsDependentOn("f")
+                .Does(() => _sb.Append("g"));
+            yield return taskG;
         }
     }
 }
