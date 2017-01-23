@@ -10,6 +10,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Cake.Core;
 using Cake.Core.Diagnostics;
 
@@ -88,8 +90,10 @@ namespace Cake.Parallel.Module
 
                 var report = new CakeReport();
 
-                var targetTask = graph.Traverse(target, taskName =>
+                var targetTask = graph.Traverse(target, (taskName, cts) =>
                 {
+                    if (cts.IsCancellationRequested) return;
+
                     var task = _tasks.FirstOrDefault(_ => _.Name.Equals(taskName, StringComparison.OrdinalIgnoreCase));
                     Debug.Assert(task != null, "Node should not be null");
 
@@ -97,7 +101,7 @@ namespace Cake.Parallel.Module
 
                     if (shouldExecuteTask(context, task, isTarget))
                     {
-                        executeTask(context, strategy, task, report);
+                        executeTask(context, strategy, cts, task, report);
                     }
                     else
                     {
@@ -110,6 +114,11 @@ namespace Cake.Parallel.Module
                 _logger.Information($"All tasks completed in {stopwatch.Elapsed}");
 
                 return report;
+            }
+            catch (TaskCanceledException)
+            {
+                exceptionWasThrown = true;
+                throw;
             }
             catch (Exception ex)
             {
@@ -204,7 +213,7 @@ namespace Cake.Parallel.Module
             return true;
         }
 
-        private void executeTask(ICakeContext context, IExecutionStrategy strategy, CakeTask task, CakeReport report)
+        private void executeTask(ICakeContext context, IExecutionStrategy strategy, CancellationTokenSource cts, CakeTask task, CakeReport report)
         {
             _logger.Verbose($"Starting task {task.Name}");
             var stopwatch = Stopwatch.StartNew();
@@ -232,6 +241,7 @@ namespace Cake.Parallel.Module
                 }
                 else
                 {
+                    cts.Cancel();
                     throw;
                 }
             }

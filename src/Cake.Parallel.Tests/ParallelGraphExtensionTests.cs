@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -29,19 +30,39 @@ namespace Cake.Parallel.Tests
         {
             Should.Throw<CakeException>(() =>
             {
-                _graph.Traverse("circ-c", _ => {});
+                _graph.Traverse("circ-c", (nodeName, cts) => {});
             });
         }
 
         [Fact]
         public async Task Should_Execute_Dependencies_Asynchronously()
         {
-            await _graph.Traverse("g", nodeName =>
+            await _graph.Traverse("g", (nodeName, cts) =>
             {
                 var task = (ActionTask)_tasks.First(_ => _.Name == nodeName);
                 task.Actions.ForEach(action => action(null));
             });
             _sb.ToString().Length.ShouldBe(7);
+        }
+
+        [Fact]
+        public async Task Should_Bubble_Errors()
+        {
+            Should.Throw<TaskCanceledException>(async () =>
+            {
+                await _graph.Traverse("error", (nodeName, cts) =>
+                {
+                    var task = (ActionTask) _tasks.Find(_ => _.Name == nodeName);
+                    try
+                    {
+                        task.Actions.ForEach(action => action(null));
+                    }
+                    catch
+                    {
+                        cts.Cancel();
+                    }
+                });
+            });
         }
 
         private IEnumerable<CakeTask> defineTasks()
@@ -108,6 +129,18 @@ namespace Cake.Parallel.Tests
                 .IsDependentOn("f")
                 .Does(() => _sb.Append("g"));
             yield return taskG;
+
+            var broken = new ActionTask("broken");
+            new CakeTaskBuilder<ActionTask>(broken)
+                .Does(() => {throw new Exception();});
+            yield return broken;
+
+            var error = new ActionTask("error");
+            new CakeTaskBuilder<ActionTask>(error)
+                .IsDependentOn("b")
+                .IsDependentOn("broken")
+                .Does(() => {});
+            yield return error;
         }
     }
 }

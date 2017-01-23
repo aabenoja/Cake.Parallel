@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Cake.Core;
 
@@ -8,32 +9,47 @@ namespace Cake.Parallel.Module
 {
     public static class ParallelGraphExtensions
     {
-        public static Task Traverse(this CakeGraph graph, string target, Action<string> executeTask)
+        public static Task Traverse(this CakeGraph graph, string target, Action<string, CancellationTokenSource> executeTask)
         {
             if (!graph.Exist(target)) return Task.CompletedTask;
             if (graph.hasCircularReferences(target)) throw new CakeException("Graph contains circular references.");
 
+            var cancellationTokenSource = new CancellationTokenSource();
             var visitedNodes = new Dictionary<string, Task>();
-            return graph.traverse(target, executeTask, visitedNodes);
+            return graph.traverse(target, executeTask, cancellationTokenSource, visitedNodes);
         }
 
-        private static Task traverse(this CakeGraph graph, string nodeName, Action<string> executeTask, IDictionary<string, Task> visitedNodes)
+        private static async Task traverse(
+            this CakeGraph graph, string nodeName,
+            Action<string, CancellationTokenSource> executeTask,
+            CancellationTokenSource cancellationTokenSource,
+            IDictionary<string, Task> visitedNodes)
         {
-            if (visitedNodes.ContainsKey(nodeName)) return visitedNodes[nodeName];
+            if (visitedNodes.ContainsKey(nodeName))
+            {
+                await visitedNodes[nodeName].ConfigureAwait(false);
+                return;
+            }
 
+            var token = cancellationTokenSource.Token;
             var dependentTasks = graph.Edges
                 .Where(_ => _.End.Equals(nodeName, StringComparison.OrdinalIgnoreCase))
                 .Select(_ =>
                 {
-                    var task = graph.traverse(_.Start, executeTask, visitedNodes);
+                    var task = graph.traverse(_.Start, executeTask, cancellationTokenSource, visitedNodes);
                     visitedNodes[_.Start] = task;
                     return task;
                 })
                 .ToArray();
 
-            if (!dependentTasks.Any()) return Task.Factory.StartNew(() => executeTask(nodeName));
+            if (dependentTasks.Any())
+            {
+                TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+                token.Register(() => tcs.TrySetCanceled(), false);
+                await Task.WhenAny(Task.WhenAll(dependentTasks), tcs.Task).ConfigureAwait(false);
+            }
 
-            return Task.Factory.ContinueWhenAll(dependentTasks, _ => executeTask(nodeName));
+            await Task.Factory.StartNew(() => executeTask(nodeName, cancellationTokenSource), token).ConfigureAwait(false);
         }
 
         private static bool hasCircularReferences(this CakeGraph graph, string nodeName, Stack<string> visited = null)
