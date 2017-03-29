@@ -5,9 +5,9 @@ namespace Cake.Parallel.Module
 {
     public class ParallelCakeModule : ICakeModule
     {
-        public void Register(ICakeContainerRegistry registry)
+        public void Register(ICakeContainerRegistrar registrar)
         {
-            registry.RegisterType<ParallelCakeEngine>().As<ICakeEngine>().Singleton();
+            registrar.RegisterType<ParallelCakeEngine>().As<ICakeEngine>().Singleton();
         }
     }
 }

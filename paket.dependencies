@@ -1,7 +1,7 @@
 framework: net461
 source http://nuget.org/api/v2
 
-nuget Cake.Core 0.15.0
+nuget Cake.Core 0.19.1
 nuget Cake.Testing
 nuget Shouldly
 nuget xunit

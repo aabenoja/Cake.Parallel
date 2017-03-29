@@ -1,7 +1,7 @@
 FRAMEWORK: NET461
 NUGET
   remote: http://www.nuget.org/api/v2
-    Cake.Core (0.15)
+    Cake.Core (0.19.1)
     Cake.Testing (0.15)
       Cake.Core (>= 0.15)
     Shouldly (2.8.2)

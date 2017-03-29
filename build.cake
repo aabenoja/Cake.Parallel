@@ -6,28 +6,41 @@ var isPaketInstalled = FileExists(paketPath);
 var target = Argument("target", "default");
 
 Task("bootstrap-paket")
-    .WithCriteria(!isPaketInstalled)
-    .Does(() =>
+  .WithCriteria(!isPaketInstalled)
+  .Does(() =>
+  {
+    if (StartProcess(".paket/paket.bootstrapper.exe") != 0)
     {
-        if (StartProcess(".paket/paket.bootstrapper.exe") != 0)
-            Error("Unable to fetch paket.exe");
+      Error("Unable to fetch paket.exe");
+    }
 
-        paketPath = ".paket/paket.exe";
-    });
+    paketPath = ".paket/paket.exe";
+  });
 
 Task("paket-restore")
-    .IsDependentOn("bootstrap-paket")
-    .Does(() =>
+  .IsDependentOn("bootstrap-paket")
+  .Does(() =>
+  {
+    if (StartProcess(paketPath, "restore") != 0)
     {
-        if (StartProcess(paketPath, "restore") != 0)
-            Error("Paket restore failed");
-    });
+      Error("Paket restore failed");
+    }
+  });
 
 Task("compile")
   .IsDependentOn("paket-restore")
   .Does(() =>
   {
     MSBuild("./src/Cake.Parallel.sln");
+  });
+
+Task("compile-release")
+  .IsDependentOn("paket-restore")
+  .Does(() =>
+  {
+    MSBuild("./src/Cake.Parallel.sln", new MSBuildSettings {
+      Configuration = "Release"
+    });
   });
 
 Task("xUnit")

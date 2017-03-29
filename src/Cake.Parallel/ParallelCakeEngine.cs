@@ -90,6 +90,7 @@ namespace Cake.Parallel.Module
 
                 var report = new CakeReport();
 
+
                 var targetTask = graph.Traverse(target, (taskName, cts) =>
                 {
                     if (cts.IsCancellationRequested) return;
@@ -120,6 +121,12 @@ namespace Cake.Parallel.Module
                 exceptionWasThrown = true;
                 throw;
             }
+            catch(AggregateException ex)
+            {
+                exceptionWasThrown = true;
+                thrownException = ex.InnerException;
+                throw;
+            }
             catch (Exception ex)
             {
                 exceptionWasThrown = true;
@@ -141,11 +148,6 @@ namespace Cake.Parallel.Module
         {
             _taskTeardownAction = action;
         }
-
-        public event EventHandler<SetupEventArgs> Setup;
-        public event EventHandler<TeardownEventArgs> Teardown;
-        public event EventHandler<TaskSetupEventArgs> TaskSetup;
-        public event EventHandler<TaskTeardownEventArgs> TaskTeardown;
 
         private void performSetup(IExecutionStrategy strategy, ICakeContext context)
         {
@@ -224,6 +226,11 @@ namespace Cake.Parallel.Module
             try
             {
                 strategy.Execute(task, context);
+            }
+            catch (TaskCanceledException)
+            {
+                execptionWasThrown = true;
+                throw;
             }
             catch (Exception exception)
             {
@@ -346,46 +353,10 @@ namespace Cake.Parallel.Module
             }
         }
 
-        public IReadOnlyList<CakeTask> Tasks { get; }
-    }
-
-    public class SetupEventArgs : EventArgs
-    {
-        public ICakeContext Context { get; }
-
-        public SetupEventArgs(ICakeContext context)
-        {
-            Context = context;
-        }
-    }
-
-    public class TeardownEventArgs : EventArgs
-    {
-        public ITeardownContext TeardownContext { get; }
-
-        public TeardownEventArgs(ITeardownContext teardownContext)
-        {
-            TeardownContext = teardownContext;
-        }
-    }
-
-    public class TaskSetupEventArgs : EventArgs
-    {
-        public ITaskSetupContext TaskSetupContext { get; }
-
-        public TaskSetupEventArgs(ITaskSetupContext taskSetupContext)
-        {
-            TaskSetupContext = taskSetupContext;
-        }
-    }
-
-    public class TaskTeardownEventArgs : EventArgs
-    {
-        public ITaskTeardownContext TaskTeardownContext { get; }
-
-        public TaskTeardownEventArgs(ITaskTeardownContext taskTeardownContext)
-        {
-            TaskTeardownContext = taskTeardownContext;
-        }
+        public IReadOnlyList<CakeTask> Tasks => _tasks;
+        public event EventHandler<SetupEventArgs> Setup;
+        public event EventHandler<TeardownEventArgs> Teardown;
+        public event EventHandler<TaskSetupEventArgs> TaskSetup;
+        public event EventHandler<TaskTeardownEventArgs> TaskTeardown;
     }
 }

@@ -46,6 +46,7 @@
     <Compile Include="ParallelCakeModule.cs" />
     <Compile Include="ParallelGraphBuilder.cs" />
     <Compile Include="ParallelGraphExtensions.cs" />
+    <Compile Include="ParallelActionTaskExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
