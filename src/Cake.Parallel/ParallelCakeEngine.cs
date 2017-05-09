@@ -346,7 +346,7 @@ namespace Cake.Parallel.Module
             }
         }
 
-        public IReadOnlyList<CakeTask> Tasks { get; }
+        public IReadOnlyList<CakeTask> Tasks => _tasks;
     }
 
     public class SetupEventArgs : EventArgs
