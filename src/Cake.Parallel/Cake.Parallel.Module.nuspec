@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Cake.Parallel.Module</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>aabenoja</authors>
+    <owners>aabenoja</owners>
+    <projectUrl>https://github.com/aabenoja/Cake.Parallel</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Run your build tasks in parallel</description>
+    <copyright>Copyright 2017</copyright>
+    <tags>Cake Parallel</tags>
+  </metadata>
+</package>
