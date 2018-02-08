@@ -9,19 +9,20 @@ namespace Cake.Parallel.Module
 {
     public static class ParallelGraphExtensions
     {
-        public static Task Traverse(this CakeGraph graph, string target, Action<string, CancellationTokenSource> executeTask)
+        public static async Task Traverse(this CakeGraph graph, string target,
+          Func<string, CancellationTokenSource, Task> executeTask)
         {
-            if (!graph.Exist(target)) return Task.CompletedTask;
+            if (!graph.Exist(target)) return;
             if (graph.hasCircularReferences(target)) throw new CakeException("Graph contains circular references.");
 
             var cancellationTokenSource = new CancellationTokenSource();
             var visitedNodes = new Dictionary<string, Task>();
-            return graph.traverse(target, executeTask, cancellationTokenSource, visitedNodes);
+            await graph.traverse(target, executeTask, cancellationTokenSource, visitedNodes);
         }
 
         private static async Task traverse(
             this CakeGraph graph, string nodeName,
-            Action<string, CancellationTokenSource> executeTask,
+            Func<string, CancellationTokenSource, Task> executeTask,
             CancellationTokenSource cancellationTokenSource,
             IDictionary<string, Task> visitedNodes)
         {
@@ -49,6 +50,8 @@ namespace Cake.Parallel.Module
                 await Task.WhenAny(Task.WhenAll(dependentTasks), tcs.Task).ConfigureAwait(false);
             }
 
+            // The below line does work correctly, but does not bubble up the TaskCanceledException
+            // await executeTask(nodeName, cancellationTokenSource).ConfigureAwait(false);
             await Task.Factory.StartNew(() => executeTask(nodeName, cancellationTokenSource), token).ConfigureAwait(false);
         }
 

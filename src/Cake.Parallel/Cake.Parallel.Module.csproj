@@ -60,8 +60,20 @@
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.6.1'">
       <ItemGroup>
+        <Reference Include="System.Drawing">
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="System.IO.Compression.FileSystem">
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="System.Numerics">
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="System.Runtime.Serialization">
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="Cake.Core">
-          <HintPath>..\..\packages\Cake.Core\lib\net45\Cake.Core.dll</HintPath>
+          <HintPath>..\..\packages\Cake.Core\lib\net46\Cake.Core.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>

@@ -21,14 +21,14 @@ namespace Cake.Parallel.Module
             {
                 foreach (var dependency in task.Dependencies)
                 {
-                    if (!graph.Exist(dependency))
+                    if (!graph.Exist(dependency.Name))
                     {
                         const string format = "Task '{0}' is dependent on task '{1}' which does not exist.";
                         var message = string.Format(CultureInfo.InvariantCulture, format, task.Name, dependency);
                         throw new CakeException(message);
                     }
 
-                    graph.Connect(dependency, task.Name);
+                    graph.Connect(dependency.Name, task.Name);
                 }
             }
             return graph;

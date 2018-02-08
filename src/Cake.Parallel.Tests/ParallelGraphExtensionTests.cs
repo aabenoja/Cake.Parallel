@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Cake.Core;
@@ -28,10 +27,7 @@ namespace Cake.Parallel.Tests
         [Fact]
         public void Throws_On_Circular_References()
         {
-            Should.Throw<CakeException>(() =>
-            {
-                _graph.Traverse("circ-c", (nodeName, cts) => {});
-            });
+            Should.Throw<CakeException>(() => _graph.Traverse("circ-c", (nodeName, cts) => Task.CompletedTask));
         }
 
         [Fact]
@@ -41,12 +37,13 @@ namespace Cake.Parallel.Tests
             {
                 var task = (ActionTask)_tasks.First(_ => _.Name == nodeName);
                 task.Actions.ForEach(action => action(null));
-            });
+                return Task.CompletedTask;
+            }).ConfigureAwait(false);
             _sb.ToString().Length.ShouldBe(7);
         }
 
         [Fact]
-        public async Task Should_Bubble_Errors()
+        public void Should_Bubble_Errors()
         {
             Should.Throw<TaskCanceledException>(async () =>
             {
@@ -61,6 +58,7 @@ namespace Cake.Parallel.Tests
                     {
                         cts.Cancel();
                     }
+                  return Task.CompletedTask;
                 });
             });
         }
@@ -117,7 +115,11 @@ namespace Cake.Parallel.Tests
             var taskF = new ActionTask("f");
             new CakeTaskBuilder<ActionTask>(taskF)
                 .IsDependentOn("e")
-                .Does(() => _sb.Append("f"));
+                .Does(() =>
+                {
+                    _sb.Append("f");
+                    return Task.CompletedTask;
+                });
             yield return taskF;
 
             var taskG = new ActionTask("g");

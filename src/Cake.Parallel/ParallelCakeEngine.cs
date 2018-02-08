@@ -58,7 +58,7 @@ namespace Cake.Parallel.Module
             _teardownAction = action;
         }
 
-        public CakeReport RunTarget(ICakeContext context, IExecutionStrategy strategy, string target)
+        public async Task<CakeReport> RunTargetAsync(ICakeContext context, IExecutionStrategy strategy, string target)
         {
             if (target == null)
             {
@@ -89,9 +89,9 @@ namespace Cake.Parallel.Module
                 performSetup(strategy, context);
 
                 var report = new CakeReport();
+                var stopwatch = Stopwatch.StartNew();
 
-
-                var targetTask = graph.Traverse(target, (taskName, cts) =>
+                await graph.Traverse(target, async (taskName, cts) =>
                 {
                     if (cts.IsCancellationRequested) return;
 
@@ -102,16 +102,14 @@ namespace Cake.Parallel.Module
 
                     if (shouldExecuteTask(context, task, isTarget))
                     {
-                        executeTask(context, strategy, cts, task, report);
+                        await executeTaskAsync(context, strategy, cts, task, report).ConfigureAwait(false);
                     }
                     else
                     {
                         skipTask(context, strategy, task, report);
                     }
-                });
+                }).ConfigureAwait(false);
 
-                var stopwatch = Stopwatch.StartNew();
-                targetTask.Wait();
                 _logger.Information($"All tasks completed in {stopwatch.Elapsed}");
 
                 return report;
@@ -215,7 +213,7 @@ namespace Cake.Parallel.Module
             return true;
         }
 
-        private void executeTask(ICakeContext context, IExecutionStrategy strategy, CancellationTokenSource cts, CakeTask task, CakeReport report)
+        private async Task executeTaskAsync(ICakeContext context, IExecutionStrategy strategy, CancellationTokenSource cts, CakeTask task, CakeReport report)
         {
             _logger.Verbose($"Starting task {task.Name}");
             var stopwatch = Stopwatch.StartNew();
@@ -225,7 +223,7 @@ namespace Cake.Parallel.Module
             var execptionWasThrown = false;
             try
             {
-                strategy.Execute(task, context);
+                await strategy.ExecuteAsync(task, context).ConfigureAwait(false);
             }
             catch (TaskCanceledException)
             {
