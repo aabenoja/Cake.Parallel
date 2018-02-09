@@ -1,4 +1,4 @@
-FRAMEWORK: NET461
+FRAMEWORK: NET462
 NUGET
   remote: http://www.nuget.org/api/v2
     Cake.Core (0.25)
