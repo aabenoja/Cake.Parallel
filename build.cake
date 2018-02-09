@@ -52,9 +52,6 @@ Task("xUnit")
 
 Task("Default")
   .IsDependentOn("xUnit")
-  .Does(() =>
-  {
-    Information("It works!");
-  });
+  .Does(() => {});
 
 RunTarget(target);
