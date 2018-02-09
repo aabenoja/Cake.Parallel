@@ -14,6 +14,6 @@ ensures when the parallelizer goes through the dependency graph the correct
 tasks are scheduled.
 
 ## Compatibility
-This project has been built with `Cake v0.15.0`. If you find your build
+This project has been built with `Cake v0.25.0`. If you find your build
 is throwing exceptions around methods not being implemented please check
 what version of `Cake` you've pulled down during your build.
