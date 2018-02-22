@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Cake.Parallel.Module</id>
-    <version>$version$</version>
+    <version>0.20.1-rc1</version>
     <title>$title$</title>
     <authors>aabenoja</authors>
     <owners>aabenoja</owners>
