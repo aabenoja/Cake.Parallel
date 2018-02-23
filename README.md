@@ -1,5 +1,6 @@
 # Cake.Parallel
 [![Build status](https://ci.appveyor.com/api/projects/status/fsap4e20blw55cb0/branch/master?svg=true)](https://ci.appveyor.com/project/aabenoja/cake-parallel/branch/master)
+[![Build Status](https://travis-ci.org/aabenoja/Cake.Parallel.svg?branch=master)](https://travis-ci.org/aabenoja/Cake.Parallel)
 
 This module overrides the original cake engine to run tasks in parallel.
 
