@@ -1,0 +1,7 @@
+language: csharp
+mono: latest
+dotnet: 1.1.5
+script:
+  - dotnet restore src
+  - dotnet build src
+  - dotnet test src/Cake.Parallel.Tests/
