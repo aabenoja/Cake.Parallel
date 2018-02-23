@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net46;netstandard1.6</TargetFrameworks>
     <VersionPrefix>0.20.1</VersionPrefix>
-    <VersionSuffix>rc2</VersionSuffix>
+    <VersionSuffix>rc3</VersionSuffix>
   </PropertyGroup>
 
   <ItemGroup>
