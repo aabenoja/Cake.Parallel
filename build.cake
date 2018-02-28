@@ -1,6 +1,3 @@
-var paketPath = ".paket/paket.exe";
-var isPaketInstalled = FileExists(paketPath);
-
 var target = Argument("target", "default");
 
 Task("restore")
