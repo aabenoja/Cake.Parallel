@@ -43,6 +43,18 @@ namespace Cake.Parallel.Tests
         }
 
         [Fact]
+        public async Task Should_Execute_DependenciesAndDependees_Asynchronously()
+        {
+            await _graph.Traverse("h", (nodeName, cts) =>
+            {
+                var task = (ActionTask)_tasks.First(_ => _.Name == nodeName);
+                task.Actions.ForEach(action => action(null));
+                return Task.CompletedTask;
+            }).ConfigureAwait(false);
+            _sb.ToString().Length.ShouldBe(3);
+        }
+
+        [Fact]
         public void Should_Bubble_Errors()
         {
             Should.Throw<TaskCanceledException>(async () =>
@@ -131,6 +143,23 @@ namespace Cake.Parallel.Tests
                 .IsDependentOn("f")
                 .Does(() => _sb.Append("g"));
             yield return taskG;
+
+            var taskh1 = new ActionTask("h1");
+            new CakeTaskBuilder<ActionTask>(taskh1)
+                .Does(() => _sb.Append("h1"));
+            yield return taskh1;
+
+            var taskh2 = new ActionTask("h2");
+            new CakeTaskBuilder<ActionTask>(taskh2)
+                .Does(() => _sb.Append("h2"));
+            yield return taskh2;
+
+            var taskh = new ActionTask("h");
+            new CakeTaskBuilder<ActionTask>(taskh)
+                .IsDependentOn("h1")
+                .IsDependeeOf("h2")
+                .Does(() => _sb.Append("h"));
+            yield return taskh;
 
             var broken = new ActionTask("broken");
             new CakeTaskBuilder<ActionTask>(broken)

@@ -30,6 +30,23 @@ namespace Cake.Parallel.Module
 
                     graph.Connect(dependency.Name, task.Name);
                 }
+
+                foreach(var dependee in task.Dependees)
+                {
+                    if (!graph.Exist(dependee.Name))
+                    {
+                        if (dependee.Required)
+                        {
+                            const string format = "Task '{0}' has specified that it's a dependency for task '{1}' which does not exist.";
+                            var message = string.Format(CultureInfo.InvariantCulture, format, task.Name, dependee.Name);
+                            throw new CakeException(message);
+                        }
+                    }
+                    else
+                    {
+                        graph.Connect(task.Name, dependee.Name);
+                    }
+                }
             }
             return graph;
         }
