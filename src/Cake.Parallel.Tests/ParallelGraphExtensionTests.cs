@@ -45,13 +45,13 @@ namespace Cake.Parallel.Tests
         [Fact]
         public async Task Should_Execute_DependenciesAndDependees_Asynchronously()
         {
-            await _graph.Traverse("h", (nodeName, cts) =>
+            await _graph.Traverse("h2", (nodeName, cts) =>
             {
                 var task = (ActionTask)_tasks.First(_ => _.Name == nodeName);
                 task.Actions.ForEach(action => action(null));
                 return Task.CompletedTask;
             }).ConfigureAwait(false);
-            _sb.ToString().Length.ShouldBe(3);
+            _sb.ToString().Equals("h1hh2");
         }
 
         [Fact]
