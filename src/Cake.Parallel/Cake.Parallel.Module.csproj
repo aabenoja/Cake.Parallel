@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6</TargetFrameworks>
-    <VersionPrefix>0.20.1</VersionPrefix>
+    <VersionPrefix>0.20.2</VersionPrefix>
     <VersionSuffix></VersionSuffix>
   </PropertyGroup>
 
