@@ -1,9 +1,9 @@
 FRAMEWORK: NET462
 NUGET
   remote: http://www.nuget.org/api/v2
-    Cake.Core (0.25)
-    Cake.Testing (0.25)
-      Cake.Core (>= 0.25)
+    Cake.Core (0.26.1)
+    Cake.Testing (0.26.1)
+      Cake.Core (>= 0.26.1)
     Shouldly (3.0)
     xunit (2.3.1)
       xunit.analyzers (>= 0.7)

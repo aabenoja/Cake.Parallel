@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>
-    <VersionPrefix>0.20.2</VersionPrefix>
+    <VersionPrefix>0.21.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cake.Core" Version="0.25.0" />
+    <PackageReference Include="Cake.Core" Version="0.26.1" />
   </ItemGroup>
 
 </Project>
